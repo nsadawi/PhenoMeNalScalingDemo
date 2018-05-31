@@ -1,0 +1,8 @@
+docker build -t nsadawi/lin-reg-galaxy .
+
+
+docker run -v $PWD:/data nsadawi/lin-reg-galaxy dataset.csv
+
+
+docker push nsadawi/lin-reg-galaxy
+
