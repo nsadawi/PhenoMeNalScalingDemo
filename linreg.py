@@ -1,24 +1,19 @@
 # export PYTHONPATH=./ 
-# luigi --module linreg LinRegAllDatasets --scheduler-host luigi-service.default --workers 4
-
+# luigi --module linreg LinRegAllDatasets --scheduler-host luigi-service.default --workers 100
 
 import luigi
 from luigi.contrib.kubernetes import KubernetesJobTask
-from os.path import basename
 import glob
-from datetime import datetime
-
+  
 class LinRegTask(KubernetesJobTask):
     
     datasetFile = luigi.Parameter()
-    t_start = datetime.now()
     name = "lin-reg"
     max_retrials = 1
     
     @property
     def spec_schema(self): 
         return {
-            "automountServiceAccountToken": "false",
             "containers": [{
                 "name": self.name,
                 "image": "nsadawi/lin-reg",
@@ -27,14 +22,18 @@ class LinRegTask(KubernetesJobTask):
                 ],
                 "resources": {
                   "requests": {
-                    "memory": "2G",
+                    "memory": "1G",
+                    "cpu": "1"
+                  },
+                  "limits": {
+                    "memory": "1G",
                     "cpu": "1"
                   }
                 },
                 "volumeMounts": [{
-                    "mountPath": "/work",#inside the lin-reg container
+                    "mountPath": "/work", # inside the container
                     "name": "shared-volume",
-                    "subPath": "jupyter/LinReg"#in host .. i.e. where we run this script
+                    "subPath": "jupyter/LinReg" # on host .. i.e. where we run this script
                  }]
              }],
              "volumes": [{
@@ -47,9 +46,6 @@ class LinRegTask(KubernetesJobTask):
     
     def output(self):
         filename = self.datasetFile + ".out"
-        t_end = datetime.now()
-        print(">>>>>> " + filename + " -> "+ str(t_end-self.t_start) +" <<<<<<")
-        ### filename = "data/results.csv"
         return luigi.LocalTarget(filename)
 
 class LinRegAllDatasets(luigi.WrapperTask):
