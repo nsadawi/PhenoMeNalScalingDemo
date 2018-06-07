@@ -1,5 +1,7 @@
+# make sure you setup the pythonpath
 # export PYTHONPATH=./ 
-# luigi --module linreg LinRegAllDatasets --scheduler-host luigi-service.default --workers 100
+# this is how you run several workers in parallel
+# time luigi --module linreg LinRegAllDatasets --scheduler-host luigi-service.default --workers 100
 
 import luigi
 from luigi.contrib.kubernetes import KubernetesJobTask
